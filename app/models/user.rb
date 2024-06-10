@@ -10,5 +10,9 @@ class User < ApplicationRecord
   def jwt_payload
     super
   end
+
+  # Scopes to easily find users by role
+  scope :librarians, -> { where(role: roles[:librarian]) }
+  scope :admins, -> { where(role: roles[:admin]) }
   
 end
