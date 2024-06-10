@@ -27,25 +27,28 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   private
 
-# app/controllers/users/registrations_controller.rb
-def respond_with(resource, _opts = {})
-  if resource.persisted?
-    render json: {
-      status: {
-        code: 200,
-        message: 'Signed Up Successfully',
-      },
-      data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
-    }, status: :ok
-  else
-    render json: {
-      status: {
-        message: 'User could not be created successfully',
-        errors: resource.errors.full_messages
-      }
-    }, status: :unprocessable_entity
+  def respond_with(resource, _opts = {})
+    if resource.persisted?
+      MongoLogger.create(event: 'user_sign_up', user_id: resource.id, email: resource.email)
+
+      render json: {
+        status: {
+          code: 200,
+          message: 'Signed Up Successfully',
+        },
+        data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
+      }, status: :ok
+    else
+      MongoLogger.create(event: 'user_sign_up_failed', errors: resource.errors.full_messages)
+
+      render json: {
+        status: {
+          message: 'User could not be created successfully',
+          errors: resource.errors.full_messages
+        }
+      }, status: :unprocessable_entity
+    end
   end
-end
 
   protected
 
