@@ -27,24 +27,25 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   private
 
-  def respond_with(resource, _opts = {})
-    if resource.persisted?
-      render json: {
-        status: {
-          code: 200,
-          message: 'Signed Up Successfully',
-          data: resource
-        }
-      }, status: :ok
-    else
-      render json: {
-        status: {
-          message: 'User could not be created successfully',
-          errors: resource.errors.full_messages
-        }
-      }, status: :unprocessable_entity
-    end
+# app/controllers/users/registrations_controller.rb
+def respond_with(resource, _opts = {})
+  if resource.persisted?
+    render json: {
+      status: {
+        code: 200,
+        message: 'Signed Up Successfully',
+      },
+      data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
+    }, status: :ok
+  else
+    render json: {
+      status: {
+        message: 'User could not be created successfully',
+        errors: resource.errors.full_messages
+      }
+    }, status: :unprocessable_entity
   end
+end
 
   protected
 
