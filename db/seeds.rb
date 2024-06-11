@@ -1,9 +1,20 @@
-# This file should ensure the existence of records required to run the application in every environment (production,
-# development, test). The code here should be idempotent so that it can be executed at any point in every environment.
-# The data can then be loaded with the bin/rails db:seed command (or created alongside the database with db:setup).
-#
-# Example:
-#
-#   ["Action", "Comedy", "Drama", "Horror"].each do |genre_name|
-#     MovieGenre.find_or_create_by!(name: genre_name)
-#   end
+# Destroy all existing users (optional, use with caution)
+User.destroy_all
+
+# Create admin users
+User.create!([
+  { email: 'a1@google.com', password: 'your_password', role: :admin },
+  { email: 'a2@google.com', password: 'your_password', role: :admin }
+])
+
+# Create librarian users
+User.create!([
+  { email: 'l1@google.com', password: 'your_password', role: :librarian },
+  { email: 'l2@google.com', password: 'your_password', role: :librarian },
+  { email: 'l3@google.com', password: 'your_password', role: :librarian },
+  { email: 'l4@google.com', password: 'your_password', role: :librarian },
+  { email: 'l5@google.com', password: 'your_password', role: :librarian }
+])
+
+puts "Created #{User.where(role: :admin).count} admin users"
+puts "Created #{User.where(role: :librarian).count} librarian users"

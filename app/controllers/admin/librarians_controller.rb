@@ -2,6 +2,27 @@ class Admin::LibrariansController < ApplicationController
   before_action :authenticate_user!
   before_action :ensure_admin!
 
+  def create
+    @librarian = User.new(librarian_params)
+    @librarian.role = :librarian
+  
+    if @librarian.save
+      log_event('librarian_created', current_user.id, current_user.email, librarian_id: @librarian.id)
+      render json: {
+        status: 200,
+        message: "Librarian created successfully",
+        data: UserSerializer.new(@librarian).serializable_hash[:data][:attributes]
+      }, status: :ok
+    else
+      log_event('librarian_creation_failed', current_user.id, current_user.email, errors: @librarian.errors.full_messages)
+      render json: {
+        status: 422,
+        message: "Failed to create librarian",
+        errors: @librarian.errors.full_messages
+      }, status: :unprocessable_entity
+    end
+  end
+
   def index
     @librarians = User.librarians
     log_event('librarians_listing', current_user.id, current_user.email)
@@ -33,6 +54,10 @@ class Admin::LibrariansController < ApplicationController
   end
 
   private
+
+  def librarian_params
+    params.require(:user).permit(:email, :password)
+  end
 
   def ensure_admin!
     unless current_user.admin?

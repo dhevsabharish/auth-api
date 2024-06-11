@@ -12,7 +12,7 @@ Rails.application.routes.draw do
   get "up" => "rails/health#show", as: :rails_health_check
 
   namespace :admin do
-    resources :librarians, only: [:index, :destroy]
+    resources :librarians, only: [:index, :create, :destroy]
   end
 
   # Defines the root path route ("/")
