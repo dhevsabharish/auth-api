@@ -2,8 +2,7 @@
 
 class Users::RegistrationsController < Devise::RegistrationsController
   before_action :configure_sign_up_params, only: [:create]
-  # before_action :configure_account_update_params, only: [:update]
-
+  before_action :logout_current_user, only: [:create]
   respond_to :json
 
   def create
@@ -27,20 +26,24 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   private
 
+  def logout_current_user
+    sign_out(current_user) if current_user
+  end
+
   def respond_with(resource, _opts = {})
     if resource.persisted?
       MongoLogger.create(event: 'user_sign_up', user_id: resource.id, email: resource.email)
-
+      token = generate_jwt_token(resource)
       render json: {
         status: {
           code: 200,
           message: 'Signed Up Successfully',
         },
-        data: UserSerializer.new(resource).serializable_hash[:data][:attributes]
+        data: UserSerializer.new(resource).serializable_hash[:data][:attributes],
+        token: token
       }, status: :ok
     else
       MongoLogger.create(event: 'user_sign_up_failed', errors: resource.errors.full_messages)
-
       render json: {
         status: {
           message: 'User could not be created successfully',
@@ -48,6 +51,12 @@ class Users::RegistrationsController < Devise::RegistrationsController
         }
       }, status: :unprocessable_entity
     end
+  end
+
+  def generate_jwt_token(user)
+    subject = "#{user.id}"
+    payload = { sub: subject, exp: 24.hours.from_now.to_i }
+    JWT.encode(payload, Rails.application.credentials.fetch(:secret_key_base))
   end
 
   protected
