@@ -9,18 +9,21 @@ class Users::SessionsController < Devise::SessionsController
   private
 
   def logout_current_user
-    sign_out(current_user) if current_user
+    if current_user
+      current_user.update(jti: SecureRandom.uuid)
+      sign_out(current_user)
+    end
   end
 
-  def respond_with(resource, _opts = {})
-    token = generate_jwt_token(resource)
-    MongoLogger.create(event: 'user_sign_in', user_id: resource.id, email: resource.email)
-    render json: {
-      message: "User signed-in successfully",
-      data: UserSerializer.new(resource).serializable_hash[:data][:attributes],
-      token: token
-    }, status: :ok
-  end
+def respond_with(resource, _opts = {})
+  token = generate_jwt_token(resource)
+  MongoLogger.create(event: 'user_sign_in', user_id: resource.id, email: resource.email)
+  render json: {
+    message: "User signed-in successfully",
+    data: UserSerializer.new(resource).serializable_hash[:data][:attributes],
+    token: token
+  }, status: :ok
+end
 
   def respond_to_on_destroy
     begin
