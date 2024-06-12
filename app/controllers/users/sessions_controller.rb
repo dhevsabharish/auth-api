@@ -26,11 +26,6 @@ class Users::SessionsController < Devise::SessionsController
     begin
       jwt_payload, = JWT.decode(request.headers['Authorization'].split(' ')[1], Rails.application.credentials.fetch(:secret_key_base))
       current_user = User.find(jwt_payload['sub'])
-
-      puts "current user jti"
-      puts current_user.jti
-      puts "jwt_payload jti"
-      puts jwt_payload['jti']
   
       if current_user.present? && current_user.jti == jwt_payload['jti']
         current_user.update(jti: SecureRandom.uuid)
