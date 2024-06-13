@@ -13,7 +13,7 @@ class AuthController < ApplicationController
         puts "user email"
         puts user.email
         if user && user.jti == decoded_token[0]['jti']
-          render json: { role: user.role }, status: :ok
+          render json: { role: user.role, user_id: user.id }, status: :ok
         else
           render json: { error: 'Invalid token' }, status: :unauthorized
         end
