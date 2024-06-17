@@ -15,17 +15,22 @@ class Users::SessionsController < Devise::SessionsController
     end
   end
 
-def respond_with(resource, _opts = {})
-  token = generate_jwt_token(resource)
-  MongoLogger.create(event: 'user_sign_in', user_id: resource.id, email: resource.email)
-  render json: {
-    message: "User signed-in successfully",
-    data: UserSerializer.new(resource).serializable_hash[:data][:attributes],
-    token: token
-  }, status: :ok
+  def respond_with(resource, _opts = {})
+  if resource.present?
+    token = generate_jwt_token(resource)
+    MongoLogger.create(event: 'user_sign_in', user_id: resource.id, email: resource.email)
+    render json: {
+      message: "User signed-in successfully",
+      data: UserSerializer.new(resource).serializable_hash[:data][:attributes],
+      token: token
+    }, status: :ok
+  else
+    head :no_content
+  end
 end
 
-  def respond_to_on_destroy
+def respond_to_on_destroy
+  if request.headers['Authorization'].present?
     begin
       jwt_payload, = JWT.decode(request.headers['Authorization'].split(' ')[1], Rails.application.credentials.fetch(:secret_key_base))
       current_user = User.find(jwt_payload['sub'])
@@ -42,7 +47,11 @@ end
       MongoLogger.create(event: 'user_sign_out_failed', message: "Invalid token")
       render json: { status: 401, message: "Invalid token" }, status: :unauthorized
     end
+  else
+    MongoLogger.create(event: 'user_sign_out_failed', message: "Authorization header missing")
+    render json: { status: 401, message: "Authorization header missing" }, status: :unauthorized
   end
+end
 
   def generate_jwt_token(user)
     subject = "#{user.id}"
