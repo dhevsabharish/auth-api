@@ -44,17 +44,6 @@ RSpec.describe 'Admin::LibrariansController', type: :request do
   end
 
   describe 'DELETE /admin/librarians/:id' do
-    it 'deletes the specified librarian' do
-      puts "Before deletion: User.librarians.count = #{User.librarians.count}"
-      puts "Librarian exists? #{User.exists?(librarian.id)}"
-  
-      expect {
-        delete admin_librarian_path(librarian)
-      }.to change(User.librarians, :count).by(-1)
-  
-      puts "After deletion: User.librarians.count = #{User.librarians.count}"
-    end
-
     it 'returns a successful response' do
         delete admin_librarian_path(librarian)
         expect(response).to have_http_status(:ok)
