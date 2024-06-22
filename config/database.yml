@@ -4,7 +4,7 @@ default: &default
   pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
   username: <%= ENV['DATABASE_USERNAME'] %>
   password: <%= ENV['DATABASE_PASSWORD'] %>
-  socket: /tmp/mysql.sock
+  host: <%= ENV['DATABASE_HOST'] %>
 
 development:
   <<: *default
@@ -17,5 +17,3 @@ test:
 production:
   <<: *default
   database: auth_api_production
-  username: auth_api
-  password: <%= ENV["AUTH_API_DATABASE_PASSWORD"] %>

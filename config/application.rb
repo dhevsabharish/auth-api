@@ -1,6 +1,7 @@
 require_relative "boot"
 
 require "rails/all"
+require "mongoid"
 
 # Require the gems listed in Gemfile, including any gems
 # you've limited to :test, :development, or :production.
@@ -31,5 +32,6 @@ module AuthApi
     config.session_store :cookie_store, key: '_interslice_session'
     config.middleware.use ActionDispatch::Cookies
     config.middleware.use config.session_store, config.session_options
+    Mongoid.load!(Rails.root.join("config/mongoid.yml"))
   end
 end

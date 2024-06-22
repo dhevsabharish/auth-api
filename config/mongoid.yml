@@ -3,7 +3,7 @@ development:
     default:
       database: log_db
       hosts:
-        - localhost:27017
+        - mongodb:27017
       options:
 
   options:
@@ -15,8 +15,16 @@ test:
     default:
       database: auth_api_test
       hosts:
-        - localhost:27017
+        - mongodb:27017
       options:
         read:
           mode: :primary
         max_pool_size: 1
+
+production:
+  clients:
+    default:
+      database: log_db
+      hosts:
+        - mongodb:27017
+      options:
